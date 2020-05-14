@@ -143,7 +143,7 @@
 (defn- wrap-in-let [effects destruct+syms]
   `(let [~@(apply concat destruct+syms)] ~@effects))
 
-(defn fact? [x]
+(defn- fact? [x]
   (and (vector? x) (= :fact (first x))))
 
 (defn- add-gensyms-to-facts
