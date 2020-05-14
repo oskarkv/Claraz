@@ -175,7 +175,7 @@
     (filter some?)))
 
 (defn rule*
-  "Function version of claraz.rules/rule."
+  "Function version of claraz.rules/rule. Returns an unevaluated rule."
   [name & body]
   (let [parsed (parse ::rule body)
         {:keys [docstring salience conds effects]} parsed
@@ -193,31 +193,31 @@
   "Create a Clara rule using Claraz syntax. Returns the rule, and does not
    define it in the current namespace.
 
-   Arguments: [name docstring? salience? & body]. Salience is written
-   simply :salience n, without a wrapping map.
+   Arguments: `[name docstring? salience? & body]`.
 
    Claraz syntax is similar to Clara syntax, the only difference is that
    the <- and :from are not used. Instead of :from Claraz uses a vector.
    These example should be all you need.
 
-   Clara:  [?f <- FactType [destructuring] constraints]
-   Claraz: [?f FactType [destructuring] constraints]
+   Clara:  `[?f <- FactType [destructuring] constraints]`
+   Claraz: `[?f FactType [destructuring] constraints]`
 
-   Clara:  [?f <- acc :from [FactType [destructuring] constraints]]
-   Claraz: [?f [acc FactType] [destructuring] constraints]].
+   Clara:  `[?f <- acc :from [FactType [destructuring] constraints]]`
+   Claraz: `[?f [acc FactType] [destructuring] constraints]]`.
 
-   The binding symbol (?f above), destructuring vector, and constraints
+   The binding symbol (`?f` above), destructuring vector, and constraints
    are all optional, just like in Clara.
 
-   :not, :and, :or, :exists, and :test conditions are possible, just
-   like in Clara.
+   `:not`, `:and`, `:or`, `:exists`, and `:test` conditions are
+   possible, just like in Clara.
 
    Claraz also makes it possible to use symbols bound by destructuring
    in any condition on the left-hand side in the right hand side, even
-   if they don't start with a ?. Example:
+   if they don't start with a `?`. Example:
+   ```clojure
    [Person [{:keys [name] :as p}]]
    =>
-   (insert! (->Fact name p))
+   (insert! (->Fact name p))```
 
    Reusing symbols in destructurings in later conditions shadow earlier
    ones."
@@ -226,10 +226,10 @@
   (apply rule* name body))
 
 (defmacro defrule
-  "Essentially like (def name (rule ...). Adds :rule true to the metadata
-   of the defined var. See the docstring of claraz.rules/rule for more
-   information on how to write rules and queries using the Claraz
-   syntax."
+  "Essentially like `(def name (rule ...)`. Adds `:rule true` to the
+   metadata of the defined var. See the docstring of `claraz.rules/rule`
+   for more information on how to write rules and queries using the
+   Claraz syntax."
   {:style/indent :defn}
   [name & body]
   (let [{:keys [doc] :as r} (apply rule* name body)]
@@ -241,7 +241,7 @@
   (atom {}))
 
 (defn query*
-  "Function version of claraz.rules/query."
+  "Function version of `claraz.rules/query`. Returns an unevaluated query."
   [name & body]
   (let [{:keys [docstring argsv conds rhs] :as parsed} (parse ::query body)
         kw-argsv (mapv keyword argsv)
@@ -261,7 +261,7 @@
 
 (defmacro query
   "Create a Clara query using Claraz syntax. See the docstring of
-   claraz.rules/rule."
+   `claraz.rules/rule`."
   {:style/indent :defn}
   [name & body]
   `(let [q# ~(apply query* name body)]
@@ -269,8 +269,8 @@
      q#))
 
 (defmacro defquery
-  "Essentially like (def name (query ...)). Adds :query true to the
-   metadata of the defined var. See the docstring of claraz.rules/rule
+  "Essentially like `(def name (query ...))`. Adds `:query true` to the
+   metadata of the defined var. See the docstring of `claraz.rules/rule`
    for more information on how to write rules and queries using the
    Claraz syntax."
   {:style/indent :defn}
@@ -285,16 +285,16 @@
     (mapv #(walk/postwalk-replace % returns*) results)))
 
 (defn query+
-  "Like clara.rules/query but with two modifications.
+  "Like `clara.rules/query` but with two modifications.
 
-   First, query-or-kw can be a keyword naming a query created by
-   claraz.rules/query (or query*) and can be used in case the rule is
-   not defined in a namespace. The keyword should just be a keyword
-   version of the symbol used in the claraz.rules/query call.
+   First, `query-or-kw` can be a keyword naming a query created by
+   `claraz.rules/query` (or `query*`) and can be used in case the rule
+   is not defined in a namespace. The keyword should just be a keyword
+   version of the symbol used in the `claraz.rules/query` call.
 
    Seconds, args can (but doesn't have to) be passed without the
-   keywords, as positional args, e.g. (query+ session some-query 1 2)
-   instead of (query+ session some-query :?x 1 :?y 2)."
+   keywords, as positional args, e.g. `(query+ session some-query 1 2)`
+   instead of `(query+ session some-query :?x 1 :?y 2)`."
   [session query-or-kw & args]
   (let [{::keys [returns] :as q} (cond-> query-or-kw
                                    (keyword? query-or-kw) (@queries))
