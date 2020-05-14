@@ -28,6 +28,20 @@ side of rules looks like a =let=, seemed awkward, and the
 nesting. So I thought I'd just use something similar to
 Clara's syntax.
 
+* Use
+
+Clojure CLI/deps.edn
+#+BEGIN_SRC clojure
+claraz {:mvn/version "0.1.0"}
+#+END_SRC
+
+Leiningen/Boot
+#+BEGIN_SRC clojure
+[claraz "0.1.0"]
+#+END_SRC
+
+[[https://clojars.org/claraz][Claraz on Clojars]]
+
 * Examples
 
 The following example shows the small differences in
