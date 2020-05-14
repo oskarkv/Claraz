@@ -1,0 +1,87 @@
+* Introduction
+
+Claraz is a thin layer on top of [[https://github.com/cerner/clara-rules][Clara]] that provides these
+few conveniences:
+
++ Claraz removes =<-= and =:from= from the condition syntax,
+  and uses symbols (e.g. =?x=) instead of keywords (e.g.
+  =:?x=) in query arguments vectors.
++ Clara uses =defrule= and =defquery= to define rules and
+  queries, but you don't always want a new var in your
+  namespace. Claraz provides =rule= and =query= macros that
+  don't def new vars, as well as =defrule= and =defquery=
+  macros, that works like Clara's variants, but use the new
+  syntax.
++ Allows use of destructuring symbols (without a leading =?=)
+  in the right-hand side of rules.
++ Allows querying with positional arguments, instead of
+  keyword arguments (e.g. =:?x=).
++ Allows a right-hand side in queries, to control the
+  structure of the return value.
+
+Claraz was inspired by [[https://github.com/oakes/clarax][Clarax]]. The problem with Clarax is
+that it does not allow the use of =:and=, =:or=, =:not=,
+=:exists= and =:test=. I considered adding them to Clarax,
+but adding them to the syntax of Clarax, where the left-hand
+side of rules looks like a =let=, seemed awkward, and the
+=let= would stop looking like a =let=, especially with
+nesting. So I thought I'd just use something similar to
+Clara's syntax.
+
+* Examples
+
+The following example shows the small differences in
+syntax between Clara and Claraz, and demonstrates the use of
+symbols without =?= on the right-hand side.
+
+#+BEGIN_SRC clojure
+(rule my-rule
+  [?p Player [{:keys [name id]}] (= id ?id)]
+  [?count [(acc/count) Item] (= owner ?id)]
+  =>
+  (println name "has" ?count "items."))
+#+END_SRC
+
+A few things to note:
+
++ In the first condition the =<-= arrow has simply been
+  removed.
++ In the second condition =[(acc/count) Item] ...= is used
+  instead of =(acc/count) :from [Item ...]=.
++ Lastly, note the use of =name= on the right-hand side.
+
+Leaving out the accumulator, and just writing =?items
+[Item]= implicitly uses the =(acc/all)= accumulator.
+
+Next, let's look at a query.
+
+#+BEGIN_SRC clojure
+(-> (mk-session
+     [(claraz/query my-query
+        [?id]
+        [?p Player [{:keys [id name]}] (= id ?id) (= name ?name)]
+        [?count [(acc/count) Item] (= owner ?id)]
+        =>
+        [?name ?count])])
+  (insert (->Player 0 "Bob"))
+  (insert (->Item 0))
+  (insert (->Item 0))
+  fire-rules
+  (claraz/query+ :my-query 0))
+#+END_SRC
+
+This would return =[["Bob" 2]]=. There are a few things to note:
+
++ Claraz uses symbols in the arguments vector instead of
+  keywords.
++ The query has a right-hand side. Without it, the returned
+  value would have been =({:?p {:id 0, :name "Bob"}, :?id 0,
+  :?name "Bob", :?count 2})=.
++ Claraz's =query+= function can take the query as a
+  keyword (the keyword corresponding to the name of
+  the query used with =query=) in case it is not defined as
+  a var.
++ The =query+= function can accept the query arguments as
+  positional arguments instead of keyword arguments. You
+  can, however, still use keyword arguments with =query+= if
+  you want.
