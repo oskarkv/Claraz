@@ -254,7 +254,9 @@
                 (assoc ::returns (list 'quote (:returns rhs))))]
     query))
 
-(defn save-query [kw query]
+(defn save-query
+  "Not for users, but used in macro expansions so must be public."
+  [kw query]
   (swap! queries assoc kw query))
 
 (defmacro query
