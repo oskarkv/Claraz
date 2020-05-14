@@ -84,7 +84,7 @@
       :fact-acc)
     tag))
 
-(defmulti translate
+(defmulti ^:private translate
   "Translate rule and query conditions from Claraz syntax to Clara syntax.
    destruct+syms should be a volatile with a collection in it, to which
    vectors of the destructure structure and binding symbol will be added
